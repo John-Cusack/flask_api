@@ -18,11 +18,11 @@ class Item(Resource):
 
         query = "SELECT * FROM items WHERE name=?"
         result = cursor.execute(query, (name,))
-        row = result.fetchoen()
+        row = result.fetchone()
         connection.close()
 
         if row:
-            return {"item": {"name", row[0], "price", row[1]}}
+            return {"item": {"name": row[0], "price": row[1]}}
         return {"message": "item not found"}, 404
 
     def post(self, name):
