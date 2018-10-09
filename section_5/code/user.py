@@ -52,16 +52,17 @@ class User(object):
         connection.close()
         return user
 
-    class UserRegister(Resource):
-        def post(self):
-            data = UserRegister.parser.parse_args()
-            connection = sqlite3.connect('data.db')
-            cursor = connection.cursor()
 
-            query = "INSERT INTO users VALUES (NULL, ?, ?)"
-            cursor.execute(query, data['username'], data['password'])
+class UserRegister(Resource):
+    def post(self):
+        data = UserRegister.parser.parse_args()
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
 
-            connection.commit()
-            connection.close
+        query = "INSERT INTO users VALUES (NULL, ?, ?)"
+        cursor.execute(query, data['username'], data['password'])
 
-            return {"message": "User created successfully"}, 201
+        connection.commit()
+        connection.close
+
+        return {"message": "User created successfully"}, 201
