@@ -1,8 +1,9 @@
 import sqlite3
-from flask_restful import Resource, Api, reqparse
+from flask_restful import Resource, reqparse
 
 
-class User(object):
+class User(Resource):
+    TABLE_NAME = 'users'
 
     def __init__(self, _id, username, password):
         self.id = _id
@@ -14,7 +15,7 @@ class User(object):
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
-        query = "SELECT * FROM users WHERE username=?"
+        query = "SELECT * FROM {table} WHERE username=?".format(table=cls.TABLE_NAME)
         result = cursor.execute(query, (username,))
         row = result.fetchone()
         if row:
@@ -30,7 +31,7 @@ class User(object):
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
-        query = "SELECT * FROM users WHERE id=?"
+        query = "SELECT * FROM {table} WHERE id=?".format(table=cls.TABLE_NAME)
         result = cursor.execute(query, (_id,))
         row = result.fetchone()
         if row:
@@ -43,31 +44,33 @@ class User(object):
 
 
 class UserRegister(Resource):
+    TABLE_NAME = 'users'
+
     parser = reqparse.RequestParser()
     parser.add_argument('username',
                         type=str,
                         required=True,
-                        help="This field cannot be left blank"
+                        help="This field cannot be left blank!"
                         )
     parser.add_argument('password',
                         type=str,
                         required=True,
-                        help="This field cannot be left blank"
+                        help="This field cannot be left blank!"
                         )
 
     def post(self):
         data = UserRegister.parser.parse_args()
 
         if User.find_by_username(data['username']):
-            return {"message": "A user with that user name already exists"}, 400
+            return {"message": "User with that username already exists."}, 400
 
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
-        query = "INSERT INTO users VALUES (NULL, ?, ?)"
+        query = "INSERT INTO {table} VALUES (NULL, ?, ?)".format(table=self.TABLE_NAME)
         cursor.execute(query, (data['username'], data['password']))
 
         connection.commit()
-        connection.close
+        connection.close()
 
-        return {"message": "User created successfully"}, 201
+        return {"message": "User created successfully."}, 201
