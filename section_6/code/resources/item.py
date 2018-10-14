@@ -1,6 +1,5 @@
 from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
-import sqlite3
 from models.item import ItemModel
 
 class Item(Resource):
@@ -37,7 +36,7 @@ class Item(Resource):
 
     @jwt_required()
     def delete(self, name):
-        item = Item.find_by_name(name)
+        item = ItemModel.find_by_name(name)
         if item:
             item.delete_from_db()
 
@@ -57,17 +56,5 @@ class Item(Resource):
 
 
 class ItemList(Resource):
-    TABLE_NAME = 'items'
-
     def get(self):
-        connection = sqlite3.connect('data.db')
-        cursor = connection.cursor()
-
-        query = "SELECT * FROM {table}".format(table=self.TABLE_NAME)
-        result = cursor.execute(query)
-        items = []
-        for row in result:
-            items.append({'name': row[0], 'price': row[1]})
-        connection.close()
-
-        return {'items': items}
+        return {'items': [item.json() for item in ItemModel.query.all()]}
